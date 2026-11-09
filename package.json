@@ -1,0 +1,19 @@
+{
+  "name": "scriptcat-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "脚本猫用户脚本合集",
+  "license": "MIT",
+  "author": "fangfuzha",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "build:min": "node tools/build.mjs --minify",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.2",
+    "@types/node": "^24.0.0"
+  }
+}

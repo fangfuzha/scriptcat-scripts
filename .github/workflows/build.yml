@@ -1,0 +1,62 @@
+name: 构建脚本
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "tools/**"
+      - "tsconfig.json"
+      - "package.json"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile=false
+
+      - name: 类型检查
+        run: pnpm run check
+
+      - name: 构建
+        run: pnpm run build
+
+      - name: 提交产物
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          if git diff --cached --quiet; then
+            echo "产物无变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "chore(build): 更新 dist 产物"
+          git push
